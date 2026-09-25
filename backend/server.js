@@ -2,9 +2,14 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
+const path = require('path');
 
 const app = express();
 app.use(cors());
+
+// Serve frontend static files
+const frontendPath = path.join(__dirname, '../frontend/dist');
+app.use(express.static(frontendPath));
 
 const server = http.createServer(app);
 
@@ -40,6 +45,11 @@ app.get('/api/lyrics', async (req, res) => {
     console.error('Lyrics fetch error:', err);
     res.status(500).json({ error: err.message });
   }
+});
+
+// Catch-all handler for React Router
+app.get('*', (req, res) => {
+  res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
 io.on('connection', (socket) => {
